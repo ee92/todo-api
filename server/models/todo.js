@@ -1,4 +1,4 @@
-var {mongoose} = require('./db/mongoose.js');
+var {mongoose} = require('./../db/mongoose');
 
 var Todo = mongoose.model('Todo', {
   task: {
