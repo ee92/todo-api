@@ -32,22 +32,22 @@ app.get('/todos', (req, res) => {
   })
 })
 
-// GET route for fetching user by id
-app.get('/users/:id', (req, res) => {
+// GET route for fetching todo by id
+app.get('/todos/:id', (req, res) => {
   // get id from url
   var id = req.params.id;
   // validate id or return error
   if (!ObjectID.isValid(id)) {
-    console.log('invalid id');
     return res.status(404).send({"error": "invalid id"});
   };
-  // find and return user or error orject
-  User.findById(id).then((doc) => {
-    console.log(doc || "id not found");
-    return res.send(doc || {"error": "id not found"})
+  // find and return todo or error orject
+  Todo.findById(id).then((doc) => {
+    if (!doc) {
+      return res.status(404).send({"error": "id not found"});
+    }
+    return res.send(doc);
   }, (err) => {
     res.status(400).send({"error": "woops"});
-    console.log("woops");
   })
 })
 
