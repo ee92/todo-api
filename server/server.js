@@ -13,7 +13,7 @@ app.post('/todos', (req, res) => {
   var todo = new Todo({
     task: req.body.task
   });
-  console.log(req.body)
+  
   todo.save().then((doc) => {
     res.send(doc);
   }, (e) => {
