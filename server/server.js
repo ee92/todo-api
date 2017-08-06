@@ -52,6 +52,25 @@ app.get('/todos/:id', (req, res) => {
   })
 })
 
+// DELETE route for todos by id
+app.delete('/todos/:id', (req, res) => {
+  // get id from url
+  var id = req.params.id;
+  // validate id or return error
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send({"error": "invalid id"});
+  };
+  // find and return todo or error orject
+  Todo.findByIdAndRemove(id).then((doc) => {
+    if (!doc) {
+      return res.status(404).send({"error": "id not found"});
+    }
+    return res.send(doc);
+  }, (err) => {
+    res.status(400).send({"error": "woops"});
+  })
+})
+
 // specifiy port for express
 app.listen(port, () => {
   console.log("listening on port " + port);
