@@ -6,6 +6,7 @@ var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 // middleware to get parsed HTTP request body
 app.use(bodyParser.json());
@@ -52,8 +53,8 @@ app.get('/todos/:id', (req, res) => {
 })
 
 // specifiy port for express
-app.listen(3000, () => {
-  console.log("listening on port 3000");
+app.listen(port, () => {
+  console.log("listening on port " + port);
 });
 // for server.test.js
 module.exports = {app};
