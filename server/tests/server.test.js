@@ -10,7 +10,9 @@ const todos = [{
   task: 'somehting'
 }, {
   _id: new ObjectID,
-  task: 'something else'
+  task: 'something else',
+  completedAt: 1502138169672,
+  completed: true
 }];
 
 // remove all from todos and add defaults before each test
@@ -129,3 +131,38 @@ describe('DELETE /todos/:id', () => {
       .end(done);
   });
 });
+
+// test PATCH method for updating todo completion
+describe('PATCH /todos/:id', () => {
+  it('should update todo completed to true', (done) => {
+    var hexId = todos[0]._id.toHexString();
+    // request to update complete to true
+    supertest(app)
+      .patch('/todos/' + hexId)
+      .send({
+        completed : true
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.completed).toBe(true);
+        expect(res.body.completedAt).toBeA('number');
+      })
+      .end(done);
+  });
+
+  it('should update todo completed to false', (done) => {
+    var hexId = todos[1]._id.toHexString();
+    // request to update complete to false
+    supertest(app)
+      .patch('/todos/' + hexId)
+      .send({
+        completed : false
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.completed).toBe(false);
+        expect(res.body.completedAt).toBe(null);
+      })
+      .end(done);
+  });
+})

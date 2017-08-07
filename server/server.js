@@ -82,7 +82,7 @@ app.patch('/todos/:id', (req, res) => {
   if (!ObjectID.isValid(id)) {
     return res.status(404).send({"error": "invalid id"});
   };
-  // if task completed set completedAt
+  // if task completed set completedAt else reset to default
   if (_.isBoolean(body.completed) && body.completed) {
     body.completedAt = new Date().getTime();
   } else {
