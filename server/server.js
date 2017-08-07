@@ -1,6 +1,8 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
+
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
@@ -46,7 +48,7 @@ app.get('/todos/:id', (req, res) => {
     if (!doc) {
       return res.status(404).send({"error": "id not found"});
     }
-    return res.send(doc);
+    res.send(doc);
   }, (err) => {
     res.status(400).send({"error": "woops"});
   })
@@ -65,11 +67,38 @@ app.delete('/todos/:id', (req, res) => {
     if (!doc) {
       return res.status(404).send({"error": "id not found"});
     }
-    return res.send(doc);
+    res.send(doc);
   }, (err) => {
     res.status(400).send({"error": "woops"});
   })
 })
+
+// UPDATE route for todos by id
+app.patch('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  // allow only these properties to be updated
+  var body = _.pick(req.body, ['task', 'completed']);
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send({"error": "invalid id"});
+  };
+  // if task completed set completedAt
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  };
+  // update request body
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((doc) => {
+    if (!doc) {
+      return res.status(400).send();
+    };
+    res.send(doc);
+  }).catch((err) => {
+    res.status(400).send();
+  });
+});
 
 // specifiy port for express
 app.listen(port, () => {
