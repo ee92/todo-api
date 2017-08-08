@@ -1,4 +1,4 @@
-require('./config/config.js');
+require('./config/config');
 
 const _ = require('lodash');
 const express = require('express');
@@ -27,6 +27,20 @@ app.post('/todos', (req, res) => {
     res.send(e);
   });
 });
+
+// POST route for adding users
+app.post('/users', (req, res) => {
+  var user = new User({
+    email: req.body.email,
+    password: request.body.password
+  });
+
+  user.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.send(e);
+  })
+})
 
 // GET route for fetching todos
 app.get('/todos', (req, res) => {
