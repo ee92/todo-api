@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
+var {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 const port = process.env.PORT;
@@ -114,6 +115,11 @@ app.patch('/todos/:id', (req, res) => {
   }).catch((err) => {
     res.status(400).send();
   });
+});
+
+// GET route for fetching by token
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 // specifiy port for express
