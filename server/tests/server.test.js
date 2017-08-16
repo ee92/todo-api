@@ -3,24 +3,12 @@ const supertest = require('supertest');
 const {ObjectID} = require('mongodb');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
+const {todos, users, populateTodos, populateUsers} = require('./seed/seed')
 
-// two default tasks
-const todos = [{
-  _id: new ObjectID,
-  task: 'somehting'
-}, {
-  _id: new ObjectID,
-  task: 'something else',
-  completedAt: 1502138169672,
-  completed: true
-}];
-
-// remove all from todos and add defaults before each test
-beforeEach((done) => {
-  Todo.remove({}).then(() => {
-    Todo.insertMany(todos);
-  }).then(() => done());
-});
+// remove all from todos/users and add defaults before each test
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 // test POST method for todos
 describe('POST /todos', () => {
@@ -163,6 +151,69 @@ describe('PATCH /todos/:id', () => {
         expect(res.body.completed).toBe(false);
         expect(res.body.completedAt).toBe(null);
       })
+      .end(done);
+  });
+})
+
+// test GET method for /user/me
+describe('GET /users/me', () => {
+  it('should return user if authenticated', (done) => {
+    supertest(app)
+      .get('/users/me')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body._id).toBe(users[0]._id.toHexString());
+        expect(res.body.email).toBe(users[0].email);
+      })
+      .end(done);
+  });
+
+  it('should return 401 if not authenticated', (done) => {
+    supertest(app)
+      .get('/users/me')
+      .expect(401)
+      .end(done);
+  });
+});
+
+// test POST method for creating user
+describe('POST /users', () => {
+  it('should create a user', (done) => {
+    var email = '1@test.com';
+    var password = 'password';
+
+    supertest(app)
+      .post('/users')
+      .send({email, password})
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toExist();
+        expect(res.body._id).toExist();
+        expect(res.body.email).toBe(email)
+      })
+      .end(done);
+  });
+
+  it('should return errors if invalid fields', (done) => {
+    var email = 'bad email';
+    var password = '123';
+
+    supertest(app)
+      .post('/users')
+      .send({email, password})
+      .expect(400)
+      .end(done);
+  });
+
+  it('should not create user if email already in use', (done) => {
+    var email = '1@abc.com';
+    var password = 'user1pass';
+
+    supertest(app)
+      .post('/users')
+      .send({email, password})
+      .expect(400)
       .end(done);
   });
 })
